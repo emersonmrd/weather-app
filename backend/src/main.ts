@@ -8,9 +8,10 @@ async function bootstrap() {
   app.enableCors({
     origin: [
       'http://localhost:3001',
-      'https://weather-cbk3qiw15-emersonmrds-projects.vercel.app/',
+      'https://weather-cbk3qiw15-emersonmrds-projects.vercel.app',
     ],
     methods: 'GET,POST',
+    credentials: true,
   });
 
   app.useGlobalPipes(
@@ -21,6 +22,9 @@ async function bootstrap() {
     }),
   );
 
-  await app.listen(3000);
+  const port = process.env.PORT || 3000;
+  await app.listen(port);
+
+  console.log(`Backend rodando na porta ${port}`);
 }
 bootstrap();
