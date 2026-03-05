@@ -8,7 +8,7 @@ async function bootstrap() {
   app.enableCors({
     origin: [
       'http://localhost:3001',
-      'https://weather-cbk3qiw15-emersonmrds-projects.vercel.app',
+      'https://weather-app-sable-five-31.vercel.app',
       '/\.vercel\.app$/',
     ],
     methods: 'GET,POST',
