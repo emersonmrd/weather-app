@@ -9,6 +9,7 @@ async function bootstrap() {
     origin: [
       'http://localhost:3001',
       'https://weather-cbk3qiw15-emersonmrds-projects.vercel.app',
+      '/\.vercel\.app$/',
     ],
     methods: 'GET,POST',
     credentials: true,
