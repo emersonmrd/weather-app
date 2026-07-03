@@ -3,10 +3,11 @@
 import WeatherCard from "@/components/WeatherCard";
 import WeatherForm from "@/components/WeatherForm";
 import { getWeather } from "@/services/weather.service";
+import { WeatherResponse } from "@/types/weather";
 import { useState } from "react";
 
 export default function Home() {
-  const [weather, setWeather] = useState<any>(null);
+  const [weather, setWeather] = useState<WeatherResponse["data"] | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
@@ -16,7 +17,7 @@ export default function Home() {
       setError("");
       const data = await getWeather(city);
       setWeather(data.data);
-    } catch (err) {
+    } catch {
       setError("Cidade não encontrada");
       setWeather(null);
     } finally {
@@ -67,6 +68,12 @@ export default function Home() {
         )}
 
         {weather && <WeatherCard weather={weather} />}
+
+        <div className="mt-12 text-center">
+          <p className="text-sm text-gray-500">
+            Dados meteorológicos fornecidos por <a href="https://openweathermap.org/" target="_blank" rel="noreferrer" className="text-blue-500 hover:underline">OpenWeatherMap</a>
+          </p>
+        </div>
       </div>
     </main>
   );
