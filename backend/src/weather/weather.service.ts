@@ -2,46 +2,38 @@ import { HttpService } from '@nestjs/axios';
 import { Injectable } from '@nestjs/common';
 import { firstValueFrom } from 'rxjs';
 
-
 @Injectable()
 export class WeatherService {
   constructor(private readonly httpService: HttpService) {}
 
   async getWeatherByCity(city: string) {
+    const apiKey = process.env.OPENWEATHERMAP_API_KEY;
+    if (!apiKey) {
+      return { success: false, message: 'Chave da API (OPENWEATHERMAP_API_KEY) não configurada no servidor' };
+    }
+
     const formattedCity = city.replace('-', ' ');
-    const geoUrl = `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(formattedCity)}&count=1`;
+    const url = `https://api.openweathermap.org/data/2.5/weather?q=${encodeURIComponent(formattedCity)}&appid=${apiKey}&units=metric&lang=pt_br`;
 
-    let geoResponse;
+    let response;
     try {
-      geoResponse = await firstValueFrom(this.httpService.get(geoUrl));
+      response = await firstValueFrom(this.httpService.get(url));
     } catch (error: any) {
-      console.error('Erro na API de Geocoding:', error?.response?.data || error.message);
-      return { success: false, message: 'Erro ao conectar com serviço de clima (Geo)' };
+      console.error('Erro na API OpenWeatherMap:', error?.response?.data || error.message);
+      if (error?.response?.status === 404) {
+        return { success: false, message: 'Cidade não encontrada' };
+      }
+      return { success: false, message: 'Erro ao conectar com serviço de clima' };
     }
 
-    const location = geoResponse.data.results?.[0];
-
-    if (!location) {
-      return { success: false, message: 'Cidade não encontrada' };
-    }
-
-    const { latitude, longitude } = location;
-    const weatherUrl = `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current_weather=true`;
-
-    let weatherResponse;
-    try {
-      weatherResponse = await firstValueFrom(this.httpService.get(weatherUrl));
-    } catch (error: any) {
-      console.error('Erro na API de Clima:', error?.response?.data || error.message);
-      return { success: false, message: 'Erro ao conectar com serviço de clima (Weather)' };
-    }
+    const data = response.data;
 
     return {
       success: true,
       data: {
-        city: location.name,
-        temperature: weatherResponse.data.current_weather.temperature,
-        windspeed: weatherResponse.data.current_weather.windspeed,
+        city: data.name,
+        temperature: data.main.temp,
+        windspeed: Number((data.wind.speed * 3.6).toFixed(1)), // convert m/s to km/h
       }
     };
   }
